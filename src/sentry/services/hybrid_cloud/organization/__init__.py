@@ -4,8 +4,15 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List, Optional
 
+from pydantic import Field
+
 from sentry.models.organization import OrganizationStatus
-from sentry.services.hybrid_cloud import InterfaceWithLifecycle, silo_mode_delegation, stubbed
+from sentry.services.hybrid_cloud import (
+    InterfaceWithLifecycle,
+    SiloDataInterface,
+    silo_mode_delegation,
+    stubbed,
+)
 from sentry.silo import SiloMode
 
 if TYPE_CHECKING:
@@ -108,12 +115,12 @@ def team_status_visible() -> int:
 
 
 @dataclass
-class ApiTeam:
+class ApiTeam(SiloDataInterface):
     id: int = -1
-    status: int = field(default_factory=team_status_visible)
+    status: int = Field(default_factory=team_status_visible)
     organization_id: int = -1
     slug: str = ""
-    actor_id: int | None = None
+    actor_id: Optional[int] = None
 
     def class_name(self) -> str:
         return "Team"

@@ -34,6 +34,8 @@ from sentry.utils.pagination_factory import (
 
 logger = logging.getLogger(__name__)
 
+import pydantic
+
 from sentry.silo import SiloMode
 
 if TYPE_CHECKING:
@@ -46,6 +48,10 @@ class InterfaceWithLifecycle(ABC):
     @abstractmethod
     def close(self) -> None:
         pass
+
+
+class SiloDataInterface(pydantic.BaseModel):
+    pass
 
 
 ServiceInterface = TypeVar("ServiceInterface", bound=InterfaceWithLifecycle)
