@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any, List, Mapping, Optional
 
 from pydantic import Field
 
@@ -14,6 +14,7 @@ from sentry.services.hybrid_cloud import (
     silo_mode_delegation,
     stubbed,
 )
+from sentry.services.hybrid_cloud.user import APIUser
 from sentry.silo import SiloMode
 
 if TYPE_CHECKING:
@@ -92,6 +93,25 @@ class OrganizationService(InterfaceWithLifecycle):
             return None
 
         return self.get_organization_by_id(id=org_id, user_id=user_id)
+
+    @abstractmethod
+    def add_organization_member(
+        self,
+        *,
+        organization: ApiOrganization,
+        user: APIUser,
+        flags: ApiOrganizationMemberFlags | None,
+        role: str | None,
+    ) -> ApiOrganizationMember:
+        pass
+
+    @abstractmethod
+    def add_team_member(self, *, team_id: int, organization_member: ApiOrganizationMember) -> None:
+        pass
+
+    @abstractmethod
+    def update_membership_flags(self, *, organization_member: ApiOrganizationMember) -> None:
+        pass
 
 
 def impl_with_db() -> OrganizationService:
@@ -180,9 +200,21 @@ class ApiOrganizationMember(SiloDataInterface):
     user_id: Optional[int] = None
     member_teams: List[ApiTeamMember] = Field(default_factory=list)
     role: str = ""
+    has_global_access: bool = False
     project_ids: List[int] = Field(default_factory=list)
     scopes: List[str] = Field(default_factory=list)
     flags: ApiOrganizationMemberFlags = Field(default_factory=lambda: ApiOrganizationMemberFlags())
+
+    def get_audit_log_metadata(self, user_email: str) -> Mapping[str, Any]:
+        team_ids = [mt.team_id for mt in self.member_teams]
+
+        return {
+            "email": user_email,
+            "teams": team_ids,
+            "has_global_access": self.has_global_access,
+            "role": self.role,
+            "invite_status": None,
+        }
 
 
 @dataclass
@@ -198,13 +230,9 @@ class ApiOrganizationFlags(SiloDataInterface):
 
 @dataclass
 class ApiOrganizationSummary(SiloDataInterface):
-    """
-    The subset of organization metadata available from the control silo specifically.
-    """
-
-    slug: str = ""
     id: int = -1
-    name: str = ""
+    token: str = ""
+    email: str = ""
 
 
 @dataclass
@@ -216,6 +244,8 @@ class ApiOrganization(ApiOrganizationSummary):
 
     flags: ApiOrganizationFlags = Field(default_factory=lambda: ApiOrganizationFlags())
     status: OrganizationStatus = OrganizationStatus.VISIBLE
+
+    default_role: str = ""
 
 
 @dataclass
