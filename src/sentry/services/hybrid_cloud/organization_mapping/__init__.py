@@ -11,6 +11,7 @@ from sentry.models.user import User
 from sentry.services.hybrid_cloud import (
     InterfaceWithLifecycle,
     PatchableMixin,
+    SiloDataInterface,
     Unset,
     UnsetVal,
     silo_mode_delegation,
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, eq=True)
-class APIOrganizationMapping:
+class APIOrganizationMapping(SiloDataInterface):
     organization_id: int = -1
     slug: str = ""
     name: str = ""
@@ -34,7 +35,7 @@ class APIOrganizationMapping:
 
 
 @dataclass
-class ApiOrganizationMappingUpdate(PatchableMixin["Organization"]):
+class ApiOrganizationMappingUpdate(SiloDataInterface, PatchableMixin["Organization"]):
     organization_id: int = -1
     name: Unset[str] = UnsetVal
     customer_id: Unset[str] = UnsetVal

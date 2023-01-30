@@ -10,6 +10,7 @@ from sentry.services.hybrid_cloud import (
     ApiPaginationArgs,
     ApiPaginationResult,
     InterfaceWithLifecycle,
+    SiloDataInterface,
     silo_mode_delegation,
     stubbed,
 )
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, eq=True)
-class APIIntegration:
+class APIIntegration(SiloDataInterface):
     id: int
     provider: str
     external_id: str
@@ -49,7 +50,7 @@ class APIIntegration:
 
 
 @dataclass(frozen=True, eq=True)
-class APIOrganizationIntegration:
+class APIOrganizationIntegration(SiloDataInterface):
     id: int
     default_auth_id: int
     organization_id: int

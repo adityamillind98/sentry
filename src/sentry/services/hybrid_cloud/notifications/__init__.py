@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import dataclasses
 from abc import abstractmethod
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, List, Protocol, Sequence
 
 from sentry.notifications.types import (
@@ -9,7 +9,12 @@ from sentry.notifications.types import (
     NotificationSettingOptionValues,
     NotificationSettingTypes,
 )
-from sentry.services.hybrid_cloud import InterfaceWithLifecycle, silo_mode_delegation, stubbed
+from sentry.services.hybrid_cloud import (
+    InterfaceWithLifecycle,
+    SiloDataInterface,
+    silo_mode_delegation,
+    stubbed,
+)
 from sentry.services.hybrid_cloud.user import APIUser
 from sentry.silo import SiloMode
 from sentry.types.integrations import ExternalProviders
@@ -18,8 +23,8 @@ if TYPE_CHECKING:
     from sentry.models import NotificationSetting
 
 
-@dataclasses.dataclass
-class ApiNotificationSetting:
+@dataclass
+class ApiNotificationSetting(SiloDataInterface):
     scope_type: NotificationScopeType = NotificationScopeType.USER
     scope_identifier: int = -1
     target_id: int = -1

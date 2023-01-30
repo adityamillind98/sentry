@@ -13,7 +13,12 @@ from rest_framework.request import Request
 
 from sentry.api.authentication import ApiKeyAuthentication, TokenAuthentication
 from sentry.relay.utils import get_header_relay_id, get_header_relay_signature
-from sentry.services.hybrid_cloud import InterfaceWithLifecycle, silo_mode_delegation, stubbed
+from sentry.services.hybrid_cloud import (
+    InterfaceWithLifecycle,
+    SiloDataInterface,
+    silo_mode_delegation,
+    stubbed,
+)
 from sentry.services.hybrid_cloud.organization import ApiOrganization, ApiOrganizationMember
 from sentry.services.hybrid_cloud.user import APIUser
 from sentry.silo import SiloMode
@@ -152,19 +157,19 @@ def impl_with_db() -> AuthService:
 
 
 @dataclass
-class ApiAuthState:
+class ApiAuthState(SiloDataInterface):
     sso_state: ApiMemberSsoState
     permissions: List[str]
 
 
 @dataclass(eq=True)
-class ApiMemberSsoState:
+class ApiMemberSsoState(SiloDataInterface):
     is_required: bool = False
     is_valid: bool = False
 
 
 @dataclass
-class AuthenticationRequest:
+class AuthenticationRequest(SiloDataInterface):
     # HTTP_X_SENTRY_RELAY_ID
     sentry_relay_id: str | None = None
     # HTTP_X_SENTRY_RELAY_SIGNATURE
@@ -181,7 +186,7 @@ class AuthenticationRequest:
 
 
 @dataclass(eq=True)
-class AuthenticatedToken:
+class AuthenticatedToken(SiloDataInterface):
     entity_id: int | None = None
     kind: str = "system"
     user_id: int | None = None  # only relevant for ApiToken
@@ -242,7 +247,7 @@ class AuthenticatedToken:
 
 
 @dataclass
-class AuthenticationContext:
+class AuthenticationContext(SiloDataInterface):
     """
     The default of all values should be a valid, non authenticated context.
     """
@@ -306,13 +311,13 @@ class MiddlewareAuthenticationResponse(AuthenticationContext):
 
 
 @dataclass(eq=True, frozen=True)
-class ApiAuthProviderFlags:
+class ApiAuthProviderFlags(SiloDataInterface):
     allow_unlinked: bool = False
     scim_enabled: bool = False
 
 
 @dataclass(eq=True, frozen=True)
-class ApiAuthProvider:
+class ApiAuthProvider(SiloDataInterface):
     id: int = -1
     organization_id: int = -1
     provider: str = ""
@@ -320,7 +325,7 @@ class ApiAuthProvider:
 
 
 @dataclass
-class ApiAuthIdentity:
+class ApiAuthIdentity(SiloDataInterface):
     id: int = -1
     user_id: int = -1
     provider_id: int = -1
@@ -328,7 +333,7 @@ class ApiAuthIdentity:
 
 
 @dataclass(eq=True)
-class ApiOrganizationAuthConfig:
+class ApiOrganizationAuthConfig(SiloDataInterface):
     organization_id: int = -1
     auth_provider: ApiAuthProvider | None = None
     has_api_key: bool = False

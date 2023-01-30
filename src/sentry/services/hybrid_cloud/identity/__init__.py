@@ -4,7 +4,12 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List
 
-from sentry.services.hybrid_cloud import InterfaceWithLifecycle, silo_mode_delegation, stubbed
+from sentry.services.hybrid_cloud import (
+    InterfaceWithLifecycle,
+    SiloDataInterface,
+    silo_mode_delegation,
+    stubbed,
+)
 from sentry.silo import SiloMode
 
 if TYPE_CHECKING:
@@ -12,14 +17,14 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class APIIdentityProvider:
+class APIIdentityProvider(SiloDataInterface):
     id: int
     type: str
     external_id: str
 
 
 @dataclass(frozen=True)
-class APIIdentity:
+class APIIdentity(SiloDataInterface):
     id: int
     idp_id: int
     user_id: int

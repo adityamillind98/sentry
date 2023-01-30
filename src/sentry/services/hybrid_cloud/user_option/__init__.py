@@ -4,12 +4,17 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Iterable, List, Optional
 
-from sentry.services.hybrid_cloud import InterfaceWithLifecycle, silo_mode_delegation, stubbed
+from sentry.services.hybrid_cloud import (
+    InterfaceWithLifecycle,
+    SiloDataInterface,
+    silo_mode_delegation,
+    stubbed,
+)
 from sentry.silo import SiloMode
 
 
 @dataclass
-class ApiUserOption:
+class ApiUserOption(SiloDataInterface):
     id: int = -1
     user_id: int = -1
     value: Any = None
@@ -19,7 +24,7 @@ class ApiUserOption:
 
 
 @dataclass
-class ApiUserOptionSet:
+class ApiUserOptionSet(SiloDataInterface):
     options: List[ApiUserOption] = field(default_factory=list)
 
     def get_one(

@@ -7,7 +7,12 @@ from enum import IntEnum
 from typing import TYPE_CHECKING, Any, FrozenSet, Iterable, List, Optional
 
 from sentry.db.models import BaseQuerySet
-from sentry.services.hybrid_cloud import InterfaceWithLifecycle, silo_mode_delegation, stubbed
+from sentry.services.hybrid_cloud import (
+    InterfaceWithLifecycle,
+    SiloDataInterface,
+    silo_mode_delegation,
+    stubbed,
+)
 from sentry.silo import SiloMode
 
 if TYPE_CHECKING:
@@ -16,7 +21,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, eq=True)
-class APIUser:
+class APIUser(SiloDataInterface):
     id: int = -1
     pk: int = -1
     name: str = ""
@@ -67,7 +72,7 @@ class APIUser:
 
 
 @dataclass(frozen=True, eq=True)
-class APIAvatar:
+class APIAvatar(SiloDataInterface):
     id: int = 0
     file_id: int = 0
     ident: str = ""
@@ -75,7 +80,7 @@ class APIAvatar:
 
 
 @dataclass(frozen=True, eq=True)
-class APIUserEmail:
+class APIUserEmail(SiloDataInterface):
     id: int = 0
     email: str = ""
     is_verified: bool = False

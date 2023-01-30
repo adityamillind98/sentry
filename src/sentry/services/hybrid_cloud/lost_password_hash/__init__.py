@@ -4,7 +4,12 @@ from dataclasses import dataclass, fields
 from typing import cast
 
 from sentry.models import LostPasswordHash
-from sentry.services.hybrid_cloud import InterfaceWithLifecycle, silo_mode_delegation, stubbed
+from sentry.services.hybrid_cloud import (
+    InterfaceWithLifecycle,
+    SiloDataInterface,
+    silo_mode_delegation,
+    stubbed,
+)
 from sentry.silo import SiloMode
 
 
@@ -33,7 +38,7 @@ class LostPasswordHashService(InterfaceWithLifecycle):
 
 
 @dataclass(frozen=True)
-class APILostPasswordHash:
+class APILostPasswordHash(SiloDataInterface):
     id: int = -1
     user_id: int = -1
     hash: str = ""

@@ -5,7 +5,12 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List
 
 from sentry.constants import SentryAppInstallationStatus
-from sentry.services.hybrid_cloud import InterfaceWithLifecycle, silo_mode_delegation, stubbed
+from sentry.services.hybrid_cloud import (
+    InterfaceWithLifecycle,
+    SiloDataInterface,
+    silo_mode_delegation,
+    stubbed,
+)
 from sentry.silo import SiloMode
 
 if TYPE_CHECKING:
@@ -70,7 +75,7 @@ app_service: AppService = silo_mode_delegation(
 
 
 @dataclass
-class ApiSentryAppInstallation:
+class ApiSentryAppInstallation(SiloDataInterface):
     id: int = -1
     organization_id: int = -1
     status: int = SentryAppInstallationStatus.PENDING
@@ -78,7 +83,7 @@ class ApiSentryAppInstallation:
 
 
 @dataclass
-class ApiSentryApp:
+class ApiSentryApp(SiloDataInterface):
     id: int = -1
     scope_list: List[str] = field(default_factory=list)
     application_id: int = -1
