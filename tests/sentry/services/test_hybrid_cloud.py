@@ -20,8 +20,8 @@ class HybridCloudServiceTest(TestCase):
             ApiOrganizationFlags,
         ]
         for api_type in api_types:
-            schema = ApiTeam.schema_json(indent=2)
-            # print(f"\n{api_type.__name__}\n{schema}\n")
+            schema = api_type.schema_json(indent=2)
+            print(f"{api_type.__name__}\n{schema}\n")  # noqa
             assert schema
 
 

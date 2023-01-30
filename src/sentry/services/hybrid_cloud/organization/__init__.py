@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, List, Optional
 from pydantic import Field
 
 from sentry.models.organization import OrganizationStatus
+from sentry.roles import team_roles
 from sentry.services.hybrid_cloud import (
     InterfaceWithLifecycle,
     SiloDataInterface,
@@ -130,10 +131,14 @@ class ApiTeam(SiloDataInterface):
 class ApiTeamMember(SiloDataInterface):
     id: int = -1
     is_active: bool = False
-    role: Optional[TeamRole] = None
+    role_id: str = ""
     project_ids: List[int] = Field(default_factory=list)
     scopes: List[str] = Field(default_factory=list)
     team_id: int = -1
+
+    @property
+    def role(self) -> Optional[TeamRole]:
+        return team_roles.get(self.role_id) if self.role_id else None
 
 
 def project_status_visible() -> int:
