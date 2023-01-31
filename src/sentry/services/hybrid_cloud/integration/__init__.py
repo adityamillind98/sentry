@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple
 
 from sentry.constants import ObjectStatus
 from sentry.services.hybrid_cloud import (
@@ -57,7 +57,7 @@ class APIOrganizationIntegration(SiloDataInterface):
     integration_id: int
     config: Dict[str, Any]
     status: int  # As ObjectStatus
-    grace_period_end: datetime | None
+    grace_period_end: Optional[datetime]
 
     def __hash__(self) -> int:
         return hash(self.id)

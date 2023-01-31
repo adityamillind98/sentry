@@ -19,8 +19,8 @@ class ApiUserOption(SiloDataInterface):
     user_id: int = -1
     value: Any = None
     key: str = ""
-    project_id: int | None = None
-    organization_id: int | None = None
+    project_id: Optional[int] = None
+    organization_id: Optional[int] = None
 
 
 @dataclass

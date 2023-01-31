@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import abc
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, List, Optional
+
+from pydantic.fields import Field
 
 from sentry.constants import SentryAppInstallationStatus
 from sentry.services.hybrid_cloud import (
@@ -79,17 +81,17 @@ class ApiSentryAppInstallation(SiloDataInterface):
     id: int = -1
     organization_id: int = -1
     status: int = SentryAppInstallationStatus.PENDING
-    sentry_app: ApiSentryApp = field(default_factory=lambda: ApiSentryApp())
+    sentry_app: ApiSentryApp = Field(default_factory=lambda: ApiSentryApp())
 
 
 @dataclass
 class ApiSentryApp(SiloDataInterface):
     id: int = -1
-    scope_list: List[str] = field(default_factory=list)
+    scope_list: List[str] = Field(default_factory=list)
     application_id: int = -1
-    proxy_user_id: int | None = None  # can be null on deletion.
+    proxy_user_id: Optional[int] = None  # can be null on deletion.
     owner_id: int = -1  # relation to an organization
     name: str = ""
     slug: str = ""
     uuid: str = ""
-    events: List[str] = field(default_factory=list)
+    events: List[str] = Field(default_factory=list)

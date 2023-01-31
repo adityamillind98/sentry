@@ -5,9 +5,10 @@ import base64
 import contextlib
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Mapping, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Mapping, Optional, Tuple, Type
 
 from django.contrib.auth.models import AnonymousUser
+from pydantic.fields import Field
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.request import Request
 
@@ -169,7 +170,7 @@ class ApiMemberSsoState(SiloDataInterface):
 
 
 @dataclass
-class AuthenticationRequest(SiloDataInterface):
+class AuthenticationRequest:
     # HTTP_X_SENTRY_RELAY_ID
     sentry_relay_id: str | None = None
     # HTTP_X_SENTRY_RELAY_SIGNATURE
@@ -186,7 +187,7 @@ class AuthenticationRequest(SiloDataInterface):
 
 
 @dataclass(eq=True)
-class AuthenticatedToken(SiloDataInterface):
+class AuthenticatedToken:
     entity_id: int | None = None
     kind: str = "system"
     user_id: int | None = None  # only relevant for ApiToken
@@ -247,7 +248,7 @@ class AuthenticatedToken(SiloDataInterface):
 
 
 @dataclass
-class AuthenticationContext(SiloDataInterface):
+class AuthenticationContext:
     """
     The default of all values should be a valid, non authenticated context.
     """
@@ -321,7 +322,7 @@ class ApiAuthProvider(SiloDataInterface):
     id: int = -1
     organization_id: int = -1
     provider: str = ""
-    flags: ApiAuthProviderFlags = field(default_factory=lambda: ApiAuthProviderFlags())
+    flags: ApiAuthProviderFlags = Field(default_factory=lambda: ApiAuthProviderFlags())
 
 
 @dataclass
@@ -335,7 +336,7 @@ class ApiAuthIdentity(SiloDataInterface):
 @dataclass(eq=True)
 class ApiOrganizationAuthConfig(SiloDataInterface):
     organization_id: int = -1
-    auth_provider: ApiAuthProvider | None = None
+    auth_provider: Optional[ApiAuthProvider] = None
     has_api_key: bool = False
 
 
