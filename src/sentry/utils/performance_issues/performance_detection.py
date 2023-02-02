@@ -21,7 +21,6 @@ from sentry.grouptype.grouptype import (
     PerformanceMNPlusOneDBQueriesGroupType,
     PerformanceRenderBlockingAssetSpanGroupType,
     PerformanceSlowDBQueryGroupType,
-    PerformanceUncompressedAssetsGroupType,
 )
 from sentry.models import Organization, Project, ProjectDebugFile, ProjectOption
 from sentry.utils import metrics
