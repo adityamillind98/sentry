@@ -19,6 +19,7 @@ from sentry.grouptype.grouptype import (
     PerformanceConsecutiveDBQueriesGroupType,
     PerformanceFileIOMainThreadGroupType,
     PerformanceMNPlusOneDBQueriesGroupType,
+    PerformanceNPlusOneGroupType,
     PerformanceRenderBlockingAssetSpanGroupType,
     PerformanceSlowDBQueryGroupType,
 )
@@ -914,7 +915,7 @@ class NPlusOneDBSpanDetector(PerformanceDetector):
                 fingerprint=fingerprint,
                 op="db",
                 desc=self.n_spans[0].get("description", ""),
-                type=PerformanceMNPlusOneDBQueriesGroupType,
+                type=PerformanceNPlusOneGroupType,
                 parent_span_ids=[parent_span_id],
                 cause_span_ids=[self.source_span.get("span_id", None)],
                 offender_span_ids=[span.get("span_id", None) for span in self.n_spans],
@@ -943,7 +944,7 @@ class NPlusOneDBSpanDetector(PerformanceDetector):
         self.n_spans = []
 
     def _fingerprint(self, parent_op, parent_hash, source_hash, n_hash) -> str:
-        problem_class = PerformanceMNPlusOneDBQueriesGroupType
+        problem_class = PerformanceNPlusOneGroupType
         full_fingerprint = hashlib.sha1(
             (str(parent_op) + str(parent_hash) + str(source_hash) + str(n_hash)).encode("utf8"),
         ).hexdigest()
