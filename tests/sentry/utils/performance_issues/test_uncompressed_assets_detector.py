@@ -3,13 +3,13 @@ from typing import List
 import pytest
 
 from sentry.eventstore.models import Event
+from sentry.grouptype.grouptype import PerformanceUncompressedAssetsGroupType
 from sentry.testutils import TestCase
 from sentry.testutils.performance_issues.event_generators import PROJECT_ID, create_span, get_event
 from sentry.testutils.performance_issues.span_builder import SpanBuilder
 from sentry.testutils.silo import region_silo_test
 from sentry.utils.performance_issues.detectors import UncompressedAssetSpanDetector
 from sentry.utils.performance_issues.performance_detection import (
-    GroupType,
     PerformanceProblem,
     get_detection_settings,
     run_detector_on_data,
@@ -72,7 +72,7 @@ class UncompressedAssetsDetectorTest(TestCase):
                 fingerprint="1-1012-da39a3ee5e6b4b0d3255bfef95601890afd80709",
                 op="resource.script",
                 desc="https://s1.sentry-cdn.com/_static/dist/sentry/entrypoints/app.js",
-                type=GroupType.PERFORMANCE_UNCOMPRESSED_ASSETS,
+                type=PerformanceUncompressedAssetsGroupType,
                 parent_span_ids=[],
                 cause_span_ids=[],
                 offender_span_ids=["bbbbbbbbbbbbbbbb"],
@@ -104,7 +104,7 @@ class UncompressedAssetsDetectorTest(TestCase):
                 fingerprint="1-1012-da39a3ee5e6b4b0d3255bfef95601890afd80709",
                 op="resource.script",
                 desc="https://s1.sentry-cdn.com/_static/dist/sentry/entrypoints/app.css",
-                type=GroupType.PERFORMANCE_UNCOMPRESSED_ASSETS,
+                type=PerformanceUncompressedAssetsGroupType,
                 parent_span_ids=[],
                 cause_span_ids=[],
                 offender_span_ids=["bbbbbbbbbbbbbbbb"],
@@ -207,7 +207,7 @@ class UncompressedAssetsDetectorTest(TestCase):
                 fingerprint="1-1012-cd13ad1ab06d25a36fb216047291643e48228608",
                 op="resource.script",
                 desc="https://s1.sentry-cdn.com/_static/dist/sentry/chunks/app_components_charts_utils_tsx-app_utils_performance_quickTrace_utils_tsx-app_utils_withPage-3926ec.bc434924850c44d4057f.js",
-                type=GroupType.PERFORMANCE_UNCOMPRESSED_ASSETS,
+                type=PerformanceUncompressedAssetsGroupType,
                 parent_span_ids=[],
                 cause_span_ids=[],
                 offender_span_ids=["b66a5642da1edb52"],
