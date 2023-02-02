@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Mapping, Optional, Tuple, Type
 
+import pydantic
 from django.contrib.auth.models import AnonymousUser
 from pydantic.fields import Field
 from rest_framework.authentication import BaseAuthentication
@@ -163,7 +164,7 @@ class ApiAuthState(SiloDataInterface):
     permissions: List[str]
 
 
-@dataclass(eq=True)
+@pydantic.dataclasses.dataclass(eq=True)
 class ApiMemberSsoState(SiloDataInterface):
     is_required: bool = False
     is_valid: bool = False
