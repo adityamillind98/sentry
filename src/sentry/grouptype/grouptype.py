@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from sentry.event_manager import DEFAULT_GROUPHASH_IGNORE_LIMIT
+# from sentry.event_manager import DEFAULT_GROUPHASH_IGNORE_LIMIT
 from sentry.types.issues import GroupCategory
 
 _group_type_registry = {}
@@ -12,7 +12,8 @@ class GroupType:
     slug: str
     description: str
     category: int
-    ignore_limit: int = DEFAULT_GROUPHASH_IGNORE_LIMIT
+    ignore_limit: int = 3  # circular import issue here
+    # ignore_limit: int = DEFAULT_GROUPHASH_IGNORE_LIMIT
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -39,6 +40,13 @@ def get_group_type_by_slug(slug):
     raise ValueError(f"No group type with the slug {slug} is registered.")
 
 
+def get_group_type_by_type_id(id):
+    for group_type in _group_type_registry.values():
+        if group_type.type_id == id:
+            return group_type
+    raise ValueError(f"No group type with the id {id} is registered.")
+
+
 @dataclass(frozen=True)
 class ErrorGroupType(GroupType):
     type_id = 1
@@ -49,7 +57,7 @@ class ErrorGroupType(GroupType):
 
 
 @dataclass(frozen=True)
-class SlowDBQueryGroupType(GroupType):
+class PerformanceSlowDBQueryGroupType(GroupType):
     type_id = 1001
     slug = "performance_slow_db_query"
     description = "Slow DB Query"

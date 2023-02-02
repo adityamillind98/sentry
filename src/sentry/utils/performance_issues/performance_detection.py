@@ -15,8 +15,15 @@ from symbolic import ProguardMapper  # type: ignore
 
 from sentry import features, nodestore, options, projectoptions
 from sentry.eventstore.models import Event
+from sentry.grouptype.grouptype import (
+    PerformanceConsecutiveDBQueriesGroupType,
+    PerformanceFileIOMainThreadGroupType,
+    PerformanceMNPlusOneDBQueriesGroupType,
+    PerformanceRenderBlockingAssetSpanGroupType,
+    PerformanceSlowDBQueryGroupType,
+    PerformanceUncompressedAssetsGroupType,
+)
 from sentry.models import Organization, Project, ProjectDebugFile, ProjectOption
-from sentry.types.issues import GroupType
 from sentry.utils import metrics
 from sentry.utils.event_frames import get_sdk_name
 from sentry.utils.safe import get_path
@@ -421,7 +428,7 @@ class SlowDBQueryDetector(PerformanceDetector):
     def _fingerprint(self, hash):
         signature = (str(hash)).encode("utf-8")
         full_fingerprint = hashlib.sha1(signature).hexdigest()
-        return f"1-{GroupType.PERFORMANCE_SLOW_DB_QUERY.value}-{full_fingerprint}"
+        return f"1-{PerformanceSlowDBQueryGroupType.type_id}-{full_fingerprint}"
 
 
 class RenderBlockingAssetSpanDetector(PerformanceDetector):
@@ -479,7 +486,7 @@ class RenderBlockingAssetSpanDetector(PerformanceDetector):
                     fingerprint=fingerprint,
                     op=op,
                     desc=span.get("description") or "",
-                    type=GroupType.PERFORMANCE_RENDER_BLOCKING_ASSET_SPAN,
+                    type=PerformanceRenderBlockingAssetSpanGroupType,
                     offender_span_ids=[span_id],
                     parent_span_ids=[],
                     cause_span_ids=[],
@@ -511,7 +518,7 @@ class RenderBlockingAssetSpanDetector(PerformanceDetector):
 
     def _fingerprint(self, span: Span):
         url_hash = self._url_hash(span)
-        return f"1-{GroupType.PERFORMANCE_RENDER_BLOCKING_ASSET_SPAN.value}-{url_hash}"
+        return f"1-{PerformanceRenderBlockingAssetSpanGroupType.type_id}-{url_hash}"
 
     # Finds dash-separated UUIDs. (Without dashes will be caught by
     # ASSET_HASH_REGEX).
@@ -615,7 +622,7 @@ class ConsecutiveDBSpanDetector(PerformanceDetector):
             fingerprint,
             "db",
             desc=query,  # TODO - figure out which query to use for description
-            type=GroupType.PERFORMANCE_CONSECUTIVE_DB_QUERIES,
+            type=PerformanceConsecutiveDBQueriesGroupType,
             cause_span_ids=cause_span_ids,
             parent_span_ids=None,
             offender_span_ids=offender_span_ids,
@@ -694,7 +701,7 @@ class ConsecutiveDBSpanDetector(PerformanceDetector):
         hashed_spans = fingerprint_spans(
             [self.consecutive_db_spans[prior_span_index]] + self.independent_db_spans
         )
-        return f"1-{GroupType.PERFORMANCE_CONSECUTIVE_DB_QUERIES.value}-{hashed_spans}"
+        return f"1-{PerformanceConsecutiveDBQueriesGroupType.type_id}-{hashed_spans}"
 
     def on_complete(self) -> None:
         self._validate_and_store_performance_problem()
@@ -908,7 +915,7 @@ class NPlusOneDBSpanDetector(PerformanceDetector):
                 fingerprint=fingerprint,
                 op="db",
                 desc=self.n_spans[0].get("description", ""),
-                type=GroupType.PERFORMANCE_N_PLUS_ONE_DB_QUERIES,
+                type=PerformanceMNPlusOneDBQueriesGroupType,
                 parent_span_ids=[parent_span_id],
                 cause_span_ids=[self.source_span.get("span_id", None)],
                 offender_span_ids=[span.get("span_id", None) for span in self.n_spans],
@@ -937,7 +944,7 @@ class NPlusOneDBSpanDetector(PerformanceDetector):
         self.n_spans = []
 
     def _fingerprint(self, parent_op, parent_hash, source_hash, n_hash) -> str:
-        problem_class = GroupType.PERFORMANCE_N_PLUS_ONE_DB_QUERIES
+        problem_class = PerformanceMNPlusOneDBQueriesGroupType
         full_fingerprint = hashlib.sha1(
             (str(parent_op) + str(parent_hash) + str(source_hash) + str(n_hash)).encode("utf8"),
         ).hexdigest()
@@ -1046,7 +1053,7 @@ class FileIOMainThreadDetector(PerformanceDetector):
                     op=span_list[0].get("op"),
                     desc=span_list[0].get("description", ""),
                     parent_span_ids=[parent_span_id],
-                    type=GroupType.PERFORMANCE_FILE_IO_MAIN_THREAD,
+                    type=PerformanceFileIOMainThreadGroupType,
                     cause_span_ids=[],
                     offender_span_ids=[span["span_id"] for span in span_list if "span_id" in span],
                 )
@@ -1062,7 +1069,7 @@ class FileIOMainThreadDetector(PerformanceDetector):
             overall_stack.append(".".join(call_stack_strings))
         call_stack = "-".join(overall_stack).encode("utf8")
         hashed_stack = hashlib.sha1(call_stack).hexdigest()
-        return f"1-{GroupType.PERFORMANCE_FILE_IO_MAIN_THREAD.value}-{hashed_stack}"
+        return f"1-{PerformanceFileIOMainThreadGroupType.type_id}-{hashed_stack}"
 
     def _is_file_io_on_main_thread(self, span: Span) -> bool:
         data = span.get("data", {})
@@ -1224,7 +1231,7 @@ class ContinuingMNPlusOne(MNPlusOneState):
             fingerprint=self._fingerprint(db_span["hash"]),
             op="db",
             desc=db_span["description"],
-            type=GroupType.PERFORMANCE_M_N_PLUS_ONE_DB_QUERIES,
+            type=PerformanceMNPlusOneDBQueriesGroupType,
             parent_span_ids=[],
             cause_span_ids=[],
             offender_span_ids=[span["span_id"] for span in offender_spans],
@@ -1239,7 +1246,7 @@ class ContinuingMNPlusOne(MNPlusOneState):
     def _fingerprint(self, db_hash) -> str:
         # TODO: Add more information to the hash. Since issues aren't being
         # detected yet, this doesn't matter.
-        problem_class = GroupType.PERFORMANCE_M_N_PLUS_ONE_DB_QUERIES
+        problem_class = PerformanceMNPlusOneDBQueriesGroupType
         full_fingerprint = hashlib.sha1(db_hash.encode("utf8")).hexdigest()
         return f"1-{problem_class}-{full_fingerprint}"
 

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from sentry import features
 from sentry.models import Organization, Project
-from sentry.types.issues import GroupType
-
+from sentry.grouptype.grouptype import PerformanceUncompressedAssetsGroupType
 from ..base import DetectorType, PerformanceDetector, fingerprint_spans, get_span_duration
 from ..performance_problem import PerformanceProblem
 from ..types import Span
@@ -69,14 +68,14 @@ class UncompressedAssetSpanDetector(PerformanceDetector):
                 op=span.get("op"),
                 desc=span.get("description", ""),
                 parent_span_ids=[],
-                type=GroupType.PERFORMANCE_UNCOMPRESSED_ASSETS,
+                type=PerformanceUncompressedAssetsGroupType,
                 cause_span_ids=[],
                 offender_span_ids=[span.get("span_id", None)],
             )
 
     def _fingerprint(self, span) -> str:
         hashed_spans = fingerprint_spans([span])
-        return f"1-{GroupType.PERFORMANCE_UNCOMPRESSED_ASSETS.value}-{hashed_spans}"
+        return f"1-{PerformanceUncompressedAssetsGroupType.type_id}-{hashed_spans}"
 
     def is_creation_allowed_for_organization(self, organization: Organization) -> bool:
         return features.has(
