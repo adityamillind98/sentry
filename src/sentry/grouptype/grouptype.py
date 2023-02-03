@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-# from sentry.event_manager import DEFAULT_GROUPHASH_IGNORE_LIMIT
 from sentry.types.issues import GroupCategory
 
 _group_type_registry = {}
+DEFAULT_GROUPHASH_IGNORE_LIMIT = 3
 
 
 @dataclass(frozen=True)
@@ -12,8 +12,7 @@ class GroupType:
     slug: str
     description: str
     category: int
-    ignore_limit: int = 3  # circular import issue here
-    # ignore_limit: int = DEFAULT_GROUPHASH_IGNORE_LIMIT
+    ignore_limit: int = DEFAULT_GROUPHASH_IGNORE_LIMIT
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
