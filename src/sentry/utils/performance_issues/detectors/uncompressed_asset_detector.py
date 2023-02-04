@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from sentry import features
-from sentry.models import Organization, Project
 from sentry.grouptype.grouptype import PerformanceUncompressedAssetsGroupType
+from sentry.models import Organization, Project
+
 from ..base import DetectorType, PerformanceDetector, fingerprint_spans, get_span_duration
 from ..performance_problem import PerformanceProblem
 from ..types import Span
