@@ -98,7 +98,31 @@ class OrganizationMemberTeamDetailsEndpoint(OrganizationMemberEndpoint):
         if request.user.id == member.user_id:
             return True
 
-        return can_admin_team(request.access, team)
+        if self._can_admin_team(request, team):
+            return True
+
+        return False
+
+    def _can_admin_team(self, request: Request, team: Team) -> bool:
+        if request.access.has_scope("org:write"):
+            return True
+        if not request.access.has_team_membership(team):
+            return False
+        return request.access.has_team_scope(team, "team:write")
+
+    def _can_set_team_role(self, request: Request, team: Team, new_role: TeamRole) -> bool:
+        if not self._can_admin_team(request, team):
+            return False
+
+        org_roles = request.access.get_organization_roles()
+        if any(org_role.can_manage_team_role(new_role) for org_role in org_roles):
+            return True
+
+        team_role = request.access.get_team_role(team)
+        if team_role and team_role.can_manage(new_role):
+            return True
+
+        return False
 
     def _create_access_request(
         self, request: Request, team: Team, member: OrganizationMember
